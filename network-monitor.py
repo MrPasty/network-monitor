@@ -21,8 +21,8 @@ Nargs = "--dns-servers 192.168.1.7 --privileged -Rsn"
 
 nm = nmap.PortScanner()
 nm.scan(hosts='%s' % MyNetwork, arguments='%s' % Nargs)
-devicelist = []
-newdevices = []
+DEVICELIST = []
+NEWDEVICES = []
 
 
 def scannetwork():
@@ -40,7 +40,7 @@ def scannetwork():
             devicename = ' (%s)' % (nm[host].hostname())
         else:
             devicename = ' (UNKNOWN)'
-        devicelist.append(vendor + ip + devicename)
+        DEVICELIST.append(vendor + ip + devicename)
 
 
 def saveoutput():
@@ -49,7 +49,7 @@ def saveoutput():
     except IOError:
         print("An I/O error occurred when trying to load %s" % MasterList)
         raise
-    for element in devicelist:
+    for element in DEVICELIST:
         f.write(element)
         f.write('\n')
     f.close()
@@ -64,18 +64,18 @@ def comparefiles():
     f.close()
     # Compare first field (MAC) in current scan against MAC address in MasterList
     # if MAC not found in MasterList then print it out and store in new list ready to be saved to file
-    for element in devicelist:
+    for element in DEVICELIST:
         if element.split(" ")[0] not in master:
-            newdevices.append(element)
+            NEWDEVICES.append(element)
 
     # if we have some output then update master list and exit, otherwise just exit
-    if newdevices:
+    if NEWDEVICES:
         try:
             outfile = open(MasterList, 'a')
         except IOError:
             print("An I/O error occurred when trying to open %s" % MasterList)
             raise
-        for element in newdevices:
+        for element in NEWDEVICES:
             outfile.write(element)
             outfile.write('\n')
             print(element)
