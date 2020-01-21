@@ -31,7 +31,7 @@ def scannetwork():
             # if we have a vendor string use that otherwise just show whats in MAC field
             if len(nm[host]['vendor']) > 0:
                 for key, value in nm[host]['vendor'].items():
-                    vendor = "{} {}".format(key, value) + " "
+                    vendor = f"{key} {value} "
             else:
                 vendor = (nm[host]['addresses']['mac']) + " "
             ip = (nm[host]['addresses']['ipv4']) + " "
@@ -63,7 +63,7 @@ def comparefiles():
         master.append(line.split(' ')[0])
     f.close()
     # Compare first field (MAC) in current scan against MAC address in MasterList
-    # if MAC not found in MasterList then print it out and store in new list ready to be saved to file
+    # if MAC not found in MasterList then store in new list ready to be saved to file
     for element in DEVICELIST:
         if element.split(" ")[0] not in master:
             NEWDEVICES.append(element)
