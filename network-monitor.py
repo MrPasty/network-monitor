@@ -11,6 +11,7 @@
 
 import os.path
 from os import path
+from contextlib import contextmanager
 import nmap
 
 
@@ -23,6 +24,19 @@ nm = nmap.PortScanner()
 nm.scan(hosts='%s' % MyNetwork, arguments='%s' % Nargs)
 DEVICELIST = []
 NEWDEVICES = []
+
+
+@contextmanager
+def file_handler(filename, mode="r"):
+    try:
+        f = open(filename, mode)
+    except IOError as err:
+        yield None, err
+    else:
+        try:
+            yield f, None
+        finally:
+            f.close()
 
 
 def scannetwork():
@@ -43,46 +57,47 @@ def scannetwork():
         DEVICELIST.append(vendor + ip + devicename)
 
 
+def error_handler(filename, err):
+    print("The following IO error occurred when trying to open %s :" % filename, err)
+
+
 def saveoutput():
-    try:
-        f = open(MasterList, 'w')
-    except IOError:
-        print("An I/O error occurred when trying to load %s" % MasterList)
-        raise
-    for element in DEVICELIST:
-        f.write(element)
-        f.write('\n')
-    f.close()
+    with file_handler(MasterList, "w") as (f, err):
+        if err:
+            error_handler(MasterList, err)
+        else:
+            for element in DEVICELIST:
+                f.write(element)
+                f.write('\n')
 
 
 def comparefiles():
-    f = open(MasterList, 'r')
-    lines = f.readlines()
-    master = []
-    for line in lines:
-        master.append(line.split(' ')[0])
-    f.close()
-    # Compare first field (MAC) in current scan against MAC address in MasterList
-    # if MAC not found in MasterList then store in new list ready to be saved to file
-    for element in DEVICELIST:
-        if element.split(" ")[0] not in master:
-            NEWDEVICES.append(element)
+    with file_handler(MasterList, "r") as (f, err):
+        if err:
+            error_handler(MasterList, err)
+        else:
+            lines = f.readlines()
+            master = []
+            for line in lines:
+                master.append(line.split(' ')[0])
+            # Compare first field (MAC) in current scan against MAC address in MasterList
+            # if MAC not found in MasterList then store in new list ready to be saved to file
+            for element in DEVICELIST:
+                if element.split(" ")[0] not in master:
+                    NEWDEVICES.append(element)
 
-    # if we have some output then update master list and exit, otherwise just exit
-    if NEWDEVICES:
-        try:
-            outfile = open(MasterList, 'a')
-        except IOError:
-            print("An I/O error occurred when trying to open %s" % MasterList)
-            raise
-        for element in NEWDEVICES:
-            outfile.write(element)
-            outfile.write('\n')
-            print(element)
-        outfile.close()
-        exit(0)
-    else:
-        exit(0)
+            # if we have some output then update master list and exit, otherwise just exit
+            if NEWDEVICES:
+                with file_handler(MasterList, "a") as (f, err):
+                    if err:
+                        error_handler(MasterList, err)
+                    else:
+                        for element in NEWDEVICES:
+                            f.write(element)
+                            f.write('\n')
+                            print(element)
+            else:
+                exit(0)
 
 
 # Main
