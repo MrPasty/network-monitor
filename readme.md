@@ -7,4 +7,4 @@ python-nmap running with elevated privileges so it can obtain the MAC address of
 sudo setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip /usr/bin/nmap
 
 
-Please feel free to fork this code, I am not a coder and this is just scratching my own itch.
+Please feel free to fork this code, I am not a coder and this is just scratching my own itch...
